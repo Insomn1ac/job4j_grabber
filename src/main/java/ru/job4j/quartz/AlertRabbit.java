@@ -16,7 +16,8 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
 
     public static void main(String[] args) {
-        try (Connection connection = getConnection(Rabbit.readProp())) {
+        Properties properties = Rabbit.readProp();
+        try (Connection connection = getConnection(properties)) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -25,7 +26,7 @@ public class AlertRabbit {
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(5)
+                    .withIntervalInSeconds(Integer.parseInt(properties.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
