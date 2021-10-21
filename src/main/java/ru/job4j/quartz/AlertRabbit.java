@@ -5,10 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -18,7 +16,7 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
 
     public static void main(String[] args) {
-        try (Connection connection = getConnection()) {
+        try (Connection connection = getConnection(Rabbit.readProp())) {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
@@ -37,22 +35,18 @@ public class AlertRabbit {
             Thread.sleep(10000);
             scheduler.shutdown();
             System.out.println(connection);
-        } catch (Exception se) {
-            se.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private static Connection getConnection() throws IOException, ClassNotFoundException, SQLException {
-        try (InputStream in = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            Properties config = new Properties();
-            config.load(in);
-            Class.forName(config.getProperty("jdbc.driver"));
-            return DriverManager.getConnection(
-                    config.getProperty("jdbc.url"),
-                    config.getProperty("jdbc.username"),
-                    config.getProperty("jdbc.password")
-            );
-        }
+    private static Connection getConnection(Properties config) throws ClassNotFoundException, SQLException {
+        Class.forName(config.getProperty("jdbc.driver"));
+        return DriverManager.getConnection(
+                config.getProperty("jdbc.url"),
+                config.getProperty("jdbc.username"),
+                config.getProperty("jdbc.password")
+        );
     }
 
     public static class Rabbit implements Job {
@@ -65,21 +59,22 @@ public class AlertRabbit {
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
             Connection connect = (Connection) context.getJobDetail().getJobDataMap().get("connect");
-            try (PreparedStatement stmt = connect.prepareStatement("insert into rabbit (created_date) values (current_timestamp)")) {
+            try (PreparedStatement stmt = connect.prepareStatement("insert into rabbit (created_date) values (?)")) {
+                stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 stmt.execute();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
 
-        public static int readProp() {
+        public static Properties readProp() {
             Properties properties = new Properties();
             try (InputStream is = AlertRabbit.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
                 properties.load(is);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return Integer.parseInt(properties.getProperty("rabbit.interval"));
+            return properties;
         }
     }
 }
