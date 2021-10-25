@@ -24,8 +24,8 @@ public class SqlRuDateTimeParserTest {
             rsl.add(parser.parse(data));
         }
         List<LocalDateTime> expected = List.of(
-                LocalDateTime.parse("2021-10-21T10:56"),
-                LocalDateTime.parse("2021-10-22T12:11"),
+                LocalDateTime.parse("2021-10-24T10:56"),
+                LocalDateTime.parse("2021-10-25T12:11"),
                 LocalDateTime.parse("2015-01-23T14:43")
         );
         assertEquals(rsl, expected);
