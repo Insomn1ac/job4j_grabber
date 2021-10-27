@@ -7,10 +7,8 @@ import org.jsoup.select.Elements;
 import ru.job4j.utils.SqlRuDateTimeParser;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 public class SqlRuParse {
-    private static final String URL = "https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t";
 
     public static void main(String[] args) throws Exception {
         for (int i = 1; i <= 5; i++) {
@@ -25,21 +23,15 @@ public class SqlRuParse {
                 System.out.println("---------------");
             }
         }
-        SqlRuParse grabber = new SqlRuParse();
-        System.out.println(grabber.getTime(URL) + System.lineSeparator() + grabber.getDesc(URL));
+        getParse("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
     }
 
-    public String getDesc(String url) throws IOException {
-        Document doc = Jsoup.connect(url).get();
-        Element row = doc.select(".msgBody").get(1);
-        return row.text();
-    }
-
-    public LocalDateTime getTime(String url) throws IOException {
+    public static void getParse(String url) throws IOException {
         SqlRuDateTimeParser parser = new SqlRuDateTimeParser();
         Document doc = Jsoup.connect(url).get();
-        Element row = doc.select(".msgFooter").get(0);
-        String str = row.text().split(" \\[")[0];
-        return parser.parse(str);
+        Element description = doc.select(".msgBody").get(1);
+        Element time = doc.select(".msgFooter").get(0);
+        String str = time.text().split(" \\[")[0];
+        System.out.println(parser.parse(str) + System.lineSeparator() + description.text());
     }
 }
