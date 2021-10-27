@@ -23,15 +23,16 @@ public class SqlRuParse {
                 System.out.println("---------------");
             }
         }
-        getParse("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
+        String rsl = getParse("https://www.sql.ru/forum/1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t");
+        System.out.println(rsl);
     }
 
-    public static void getParse(String url) throws IOException {
+    public static String getParse(String url) throws IOException {
         SqlRuDateTimeParser parser = new SqlRuDateTimeParser();
         Document doc = Jsoup.connect(url).get();
         Element description = doc.select(".msgBody").get(1);
         Element time = doc.select(".msgFooter").get(0);
         String str = time.text().split(" \\[")[0];
-        System.out.println(parser.parse(str) + System.lineSeparator() + description.text());
+        return parser.parse(str) + System.lineSeparator() + description.text();
     }
 }
