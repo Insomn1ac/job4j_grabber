@@ -34,6 +34,10 @@ public class SqlRuDateTimeParser implements DateTimeParser {
             date = LocalDate.now().minusDays(1);
         } else if (inputDateTime[0].contains("сегодня")) {
             date = LocalDate.now();
+        } else if (Character.isLetter(inputDateTime[0].charAt(2))) {
+            inputDateTime[0] = "0" + inputDateTime[0];
+            month = parse.substring(2, 5);
+            date = LocalDate.parse(inputDateTime[0].replace(month, MONTHS.get(month)), FORMAT);
         } else {
             date = LocalDate.parse(inputDateTime[0].replace(month, MONTHS.get(month)), FORMAT);
         }
