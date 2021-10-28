@@ -24,20 +24,13 @@ public class SqlRuParse implements Parse {
     @Override
     public List<Post> list(String link) {
         List<Post> list = new ArrayList<>();
-        int id = 0;
         try {
             for (int i = 1; i <= 5; i++) {
                 Document doc = Jsoup.connect(link + i).get();
                 Elements row = doc.select(".postslisttopic");
                 for (Element td : row) {
-                    Element href = td.child(0);
-                    String url = href.attr("href");
-                    String title = href.text();
-                    Post post = detail(url);
-                    post.setId(id++);
-                    post.setLink(url);
-                    post.setTitle(title);
-                    list.add(post);
+                    String url = td.child(0).attr("href");
+                    list.add(detail(url));
                 }
             }
         } catch (IOException e) {
@@ -51,11 +44,14 @@ public class SqlRuParse implements Parse {
         Post post = new Post();
         try {
             Document vacancy = Jsoup.connect(link).get();
+            String title = vacancy.select(".messageHeader").get(0).text();
             String description = vacancy.select(".msgBody").get(1).text();
             String time = vacancy.select(".msgFooter").get(0).text();
             LocalDateTime timeOfPost = dateTimeParser.parse(time.split(" \\[")[0]);
+            post.setTitle(title);
             post.setDescription(description);
             post.setCreated(timeOfPost);
+            post.setLink(link);
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
