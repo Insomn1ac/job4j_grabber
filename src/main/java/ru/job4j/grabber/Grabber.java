@@ -62,8 +62,8 @@ public class Grabber implements Grab {
             try {
                 parse.list("https://www.sql.ru/forum/job-offers/")
                         .stream()
-                        .filter(p -> p.getDescription().toLowerCase().contains("java") &&
-                                !p.getDescription().toLowerCase().contains("javascript"))
+                        .filter(p -> p.getDescription().toLowerCase().contains("java")
+                                && !p.getDescription().toLowerCase().contains("javascript"))
                         .filter(p -> !list.contains(p))
                         .forEach(store::save);
             } catch (IOException | ParseException e) {
